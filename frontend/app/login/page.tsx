@@ -42,12 +42,6 @@ export default function LoginPage() {
     return (
         <div className="flex min-h-dvh flex-col items-center justify-center bg-[#f4f6f5] px-4 py-10">
             <div className="w-full max-w-md">
-                <div className="mb-10 flex justify-center">
-                    <span className="rounded-full border border-[#e67a25]/55 bg-orange-50/90 px-4 py-1.5 text-sm font-medium text-[#c2410c]">
-                        Acceso restringido
-                    </span>
-                </div>
-
                 <h1 className="text-center text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
                     Bienvenido
                 </h1>
@@ -106,7 +100,7 @@ export default function LoginPage() {
                     <div className="flex justify-end pt-1">
                         <button
                             type="button"
-                            className="text-sm font-medium text-[#ea580c] underline-offset-4 hover:text-[#c2410c] hover:underline"
+                            className="text-sm font-medium text-[#ff6600] underline-offset-4 hover:text-[#d63500] hover:underline"
                         >
                             ¿Olvidaste tu contraseña?
                         </button>

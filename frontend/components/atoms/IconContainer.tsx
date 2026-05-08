@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 export type FeatureIconVariant = 'orange' | 'mint';
 
 const variantClass: Record<FeatureIconVariant, string> = {
-  orange: 'bg-[#ffe8d5]',
+  orange: 'bg-[#ffd9be]',
   mint: 'bg-[#d4f0e4]',
 };
 

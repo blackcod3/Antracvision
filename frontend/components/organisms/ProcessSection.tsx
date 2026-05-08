@@ -37,7 +37,7 @@ export function ProcessSection() {
         <div className="relative">
           {/* Línea discontinua entre el centro del paso 1 y el centro del paso 3 */}
           <div
-            className="pointer-events-none absolute left-[8%] right-[8%] top-[1.75rem] z-0 hidden border-t-2 border-dashed border-[#f59040] md:block lg:left-[14%] lg:right-[14%]"
+            className="pointer-events-none absolute left-[8%] right-[8%] top-[1.75rem] z-0 hidden border-t-2 border-dashed border-[#ff7a28] md:block lg:left-[14%] lg:right-[14%]"
             aria-hidden
           />
 

@@ -11,7 +11,7 @@ export function FeatureGridSection() {
         </h2>
         <div className="grid gap-8 md:grid-cols-3 md:gap-6 lg:gap-8">
           <FeatureCard
-            icon={<Zap className="size-7 text-amber-400" strokeWidth={2.25} aria-hidden />}
+            icon={<Zap className="size-7 text-[#ff8f1f]" strokeWidth={2.25} aria-hidden />}
             iconVariant="orange"
             title="Detección Rápida"
             description="Sube una imagen del fruto y obtén el diagnóstico en segundos. Sin esperas, sin formularios complicados."

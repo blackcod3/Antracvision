@@ -11,9 +11,9 @@ function OrangeIllustration({ className }: { className?: string }) {
     >
       <defs>
         <radialGradient id="orangeSkin" cx="45%" cy="40%" r="65%">
-          <stop offset="0%" stopColor="#ffb347" />
-          <stop offset="45%" stopColor="#f97316" />
-          <stop offset="100%" stopColor="#c2410c" />
+          <stop offset="0%" stopColor="#ffc24a" />
+          <stop offset="45%" stopColor="#ff7515" />
+          <stop offset="100%" stopColor="#d63500" />
         </radialGradient>
         <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#4ade80" />
@@ -72,11 +72,11 @@ export function ProtectionCtaSection() {
       <div className="relative overflow-hidden rounded-3xl bg-[#0f291e] px-6 py-14 text-center sm:px-10 sm:py-16 md:py-20">
         {/* Ilustración de naranja (fruto) decorativa — esquina superior derecha, ligero halo */}
         <div
-          className="pointer-events-none absolute -right-2 top-4 w-[8.5rem] select-none opacity-[0.42] drop-shadow-[0_0_32px_rgba(234,120,53,0.35)] sm:-right-1 sm:top-6 sm:w-[11rem] md:w-[13rem]"
+          className="pointer-events-none absolute -right-2 top-4 w-[8.5rem] select-none opacity-[0.42] drop-shadow-[0_0_32px_rgba(255,120,42,0.42)] sm:-right-1 sm:top-6 sm:w-[11rem] md:w-[13rem]"
           aria-hidden
         >
           {/* Halo suave detrás del fruto */}
-          <div className="absolute left-1/2 top-[55%] h-[85%] w-[85%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#f59040]/20 blur-xl" />
+          <div className="absolute left-1/2 top-[55%] h-[85%] w-[85%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ff7a28]/24 blur-xl" />
           <OrangeIllustration className="relative h-auto w-full" />
         </div>
 
@@ -90,7 +90,7 @@ export function ProtectionCtaSection() {
           </p>
           <Link
             href="/detect"
-            className="mt-8 inline-flex items-center justify-center rounded-lg bg-[#e66a25] px-6 py-3 text-base font-semibold text-white transition hover:bg-[#d45f1f] active:bg-[#c5551b] sm:mt-10 sm:px-8 sm:py-3.5"
+            className="mt-8 inline-flex items-center justify-center rounded-lg bg-[#ff731a] px-6 py-3 text-base font-semibold text-white transition hover:bg-[#ff5900] active:bg-[#e34e00] sm:mt-10 sm:px-8 sm:py-3.5"
           >
             <span aria-hidden className="mr-2">
               🚀
