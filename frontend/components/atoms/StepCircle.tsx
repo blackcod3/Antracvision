@@ -13,7 +13,7 @@ export function StepCircle({ step, variant = 'outline', className = '' }: StepCi
   if (variant === 'filled') {
     return (
       <span
-        className={`${base} border-2 border-[#f59040] bg-[#f59040] text-white ${className}`}
+        className={`${base} border-2 border-[#ff7a28] bg-[#ff7a28] text-white ${className}`}
         aria-label={`Paso ${step}`}
       >
         {step}
@@ -23,7 +23,7 @@ export function StepCircle({ step, variant = 'outline', className = '' }: StepCi
 
   return (
     <span
-      className={`${base} border-2 border-[#f59040] bg-white text-[#f59040] ${className}`}
+      className={`${base} border-2 border-[#ff7a28] bg-white text-[#ff7a28] ${className}`}
       aria-label={`Paso ${step}`}
     >
       {step}

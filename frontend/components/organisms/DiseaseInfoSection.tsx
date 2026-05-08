@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import {
   SymptomInfoCard,
   type SymptomIconVariant,
@@ -63,6 +65,15 @@ export function DiseaseInfoSection() {
                   description={card.description}
                 />
               ))}
+            </div>
+
+            <div className="flex flex-col items-center border-t border-white/[0.08] pt-10">
+              <Link
+                href="/antracnosis"
+                className="inline-flex min-h-12 w-full max-w-xs items-center justify-center rounded-lg bg-[#ff731a] px-8 py-3 text-base font-semibold text-white shadow-md transition hover:bg-[#ff5900] active:bg-[#e34e00] sm:w-auto sm:max-w-none"
+              >
+                Saber más
+              </Link>
             </div>
           </div>
         </div>
