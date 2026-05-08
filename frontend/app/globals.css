@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+:root {
+  /* Fondo siempre en tono claro (cards / proceso); no usar gris muy oscuro del sistema */
+  --background: #eef4ef;
+  --foreground: #171717;
+  --page-shell: #eef4ef;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-page-shell: var(--page-shell);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--page-shell);
+  color: var(--foreground);
+}
+
+html {
+  overflow-x: clip;
+}
