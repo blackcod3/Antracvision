@@ -41,7 +41,7 @@ async def detect(file: UploadFile = File(...)):
             estado = "leve"
             recomendacion = "Monitorear la evolución y retirar frutos sospechosos; mejorar condiciones de cultivo."
 
-    record_detection(clase)
+    record_detection(clase, probabilidad, estado)
 
     resp = DetectionResponse(
         clase=clase,

@@ -4,13 +4,21 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutGrid, Wrench, Eye, BarChart3, Crosshair, ChevronRight, LogOut, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { API_BASE } from '@/lib/api';
 
 type AdminSidebarProps = {
   userName?: string;
   userRole?: string;
+  avatarUrl?: string | null;
   detectionBadge?: number;
   onLogout: () => void;
 };
+
+function resolveAvatarUrl(url?: string | null) {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  return `${API_BASE}${url}`;
+}
 
 const generalItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutGrid, exact: true },
@@ -29,14 +37,17 @@ function isActive(pathname: string, href: string, exact?: boolean) {
 }
 
 export function AdminSidebar({
-  userName = 'Naara',
+  userName = 'Administrador',
   userRole = 'Administrador',
+  avatarUrl = null,
   detectionBadge = 0,
   onLogout,
 }: AdminSidebarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const initial = userName.trim().charAt(0).toUpperCase() || 'A';
+  const photo = resolveAvatarUrl(avatarUrl);
+  const profileActive = isActive(pathname, '/admin/profile');
 
   const nav = (
     <>
@@ -130,17 +141,40 @@ export function AdminSidebar({
 
       <div className="mt-auto px-1 pt-4">
         <div className="border-t border-white/10 pt-4">
-          <div className="flex items-center gap-3 rounded-xl px-2 py-2">
-            <div
-              className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#0f241c] text-sm font-semibold text-white"
-              aria-hidden
+          <div
+            className={`flex items-center gap-3 rounded-xl px-2 py-2 ${
+              profileActive ? 'bg-white/10' : ''
+            }`}
+          >
+            <Link
+              href="/admin/profile"
+              onClick={() => setMobileOpen(false)}
+              aria-label="Ver y editar perfil"
+              title="Mi perfil"
+              className="shrink-0 rounded-full ring-offset-2 ring-offset-[#1a2f26] transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
             >
-              {initial}
-            </div>
-            <div className="min-w-0 flex-1">
+              {photo ? (
+                <img
+                  src={photo}
+                  alt=""
+                  width={36}
+                  height={36}
+                  className="size-9 rounded-full object-cover"
+                />
+              ) : (
+                <div className="flex size-9 items-center justify-center rounded-full bg-[#0f241c] text-sm font-semibold text-white">
+                  {initial}
+                </div>
+              )}
+            </Link>
+            <Link
+              href="/admin/profile"
+              onClick={() => setMobileOpen(false)}
+              className="min-w-0 flex-1 rounded-lg transition hover:opacity-90"
+            >
               <p className="truncate text-sm font-semibold text-white">{userName}</p>
               <p className="truncate text-xs text-[#8fa89a]">{userRole}</p>
-            </div>
+            </Link>
             <button
               type="button"
               onClick={onLogout}

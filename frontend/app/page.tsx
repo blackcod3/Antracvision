@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { CircleUser } from 'lucide-react';
 
+import { ScrollToSectionButton } from '@/components/atoms/ScrollToSectionButton';
 import { DiseaseInfoSection } from '@/components/organisms/DiseaseInfoSection';
 import { FeatureGridSection } from '@/components/organisms/FeatureGridSection';
 import { ProcessSection } from '@/components/organisms/ProcessSection';
@@ -62,12 +63,12 @@ export default function Home() {
           >
             Probar Ahora
           </Link>
-          <a
-            href="#features"
+          <ScrollToSectionButton
+            targetId="features"
             className="inline-flex min-h-12 items-center justify-center rounded-lg border-2 border-[#ff731a] px-8 py-3.5 text-base font-semibold text-[#e85706] transition hover:bg-[#ffd4b8]/80 active:bg-[#ffd4b8] md:text-lg"
           >
             Conocer Más
-          </a>
+          </ScrollToSectionButton>
         </div>
       </section>
 
@@ -102,7 +103,7 @@ export default function Home() {
           <p className="w-full shrink-0 text-pretty text-xs leading-snug text-[#667766] sm:w-auto sm:max-w-none sm:text-sm sm:leading-relaxed sm:text-[15px] sm:text-right">
             <span className="sm:hidden">© 2025 AntracVision</span>
             <span className="hidden sm:inline">
-              © 2025 ANTRACVISION. Todos los derechos reservados.
+              © 2026 ANTRACVISION. Todos los derechos reservados.
             </span>
           </p>
         </div>

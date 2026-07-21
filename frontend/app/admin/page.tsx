@@ -1,21 +1,93 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { Activity, CheckCircle, AlertCircle, TrendingUp } from 'lucide-react';
+import { Activity, Check, CircleDot, Gauge, Triangle } from 'lucide-react';
+import {
+  AdminAnalyticsPanels,
+  type DailyPoint,
+  type SeverityCounts,
+} from '@/components/organisms/AdminAnalyticsPanels';
 import { API_BASE, getAdminToken } from '@/components/organisms/AdminShell';
 
 type Stats = {
   total_detections: number;
   healthy: number;
   anthracnose: number;
+  severe: number;
+  avg_confidence: number;
+  healthy_pct: number;
+  anthracnose_pct: number;
+  previous_total: number;
+  total_change_pct: number;
+  daily: DailyPoint[];
+  severity: SeverityCounts;
 };
+
+const EMPTY_DAILY: DailyPoint[] = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(
+  (label) => ({ date: label, label, anthracnose: 0, healthy: 0 }),
+);
+
+type StatCardProps = {
+  icon: ReactNode;
+  iconWrapClass: string;
+  badge: ReactNode;
+  title: string;
+  value: string | number;
+  footnote: string;
+};
+
+function StatCard({ icon, iconWrapClass, badge, title, value, footnote }: StatCardProps) {
+  return (
+    <article className="rounded-2xl border border-black/[0.04] bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.06)] sm:p-6">
+      <div className="mb-5 flex items-start justify-between gap-3">
+        <div className={`flex size-11 items-center justify-center rounded-xl ${iconWrapClass}`}>
+          {icon}
+        </div>
+        <div className="pt-0.5 text-sm font-medium tabular-nums">{badge}</div>
+      </div>
+      <p className="text-[15px] text-gray-500">{title}</p>
+      <p className="mt-1 font-serif text-[2.35rem] font-bold leading-none tracking-tight text-gray-950">
+        {value}
+      </p>
+      <p className="mt-3 text-sm text-gray-400">{footnote}</p>
+    </article>
+  );
+}
+
+function TrendBadge({ value, emphasize = false }: { value: number; emphasize?: boolean }) {
+  const positive = value >= 0;
+  const abs = Math.abs(value);
+  const label = `${Number.isInteger(abs) ? abs.toFixed(0) : abs.toFixed(1)}%`;
+
+  if (!emphasize) {
+    return <span className="text-gray-500">{label}</span>;
+  }
+
+  return (
+    <span className={`inline-flex items-center gap-1 ${positive ? 'text-red-500' : 'text-emerald-600'}`}>
+      <Triangle
+        className={`size-2.5 fill-current ${positive ? '' : 'rotate-180'}`}
+        aria-hidden
+      />
+      {label}
+    </span>
+  );
+}
 
 function DashboardContent() {
   const [stats, setStats] = useState<Stats>({
     total_detections: 0,
     healthy: 0,
     anthracnose: 0,
+    severe: 0,
+    avg_confidence: 0,
+    healthy_pct: 0,
+    anthracnose_pct: 0,
+    previous_total: 0,
+    total_change_pct: 0,
+    daily: EMPTY_DAILY,
+    severity: { leve: 0, moderada: 0, severa: 0 },
   });
   const router = useRouter();
 
@@ -30,7 +102,23 @@ function DashboardContent() {
         });
         if (!response.ok) return;
         const data = await response.json();
-        setStats(data);
+        setStats({
+          total_detections: data.total_detections ?? 0,
+          healthy: data.healthy ?? 0,
+          anthracnose: data.anthracnose ?? 0,
+          severe: data.severe ?? 0,
+          avg_confidence: data.avg_confidence ?? 0,
+          healthy_pct: data.healthy_pct ?? 0,
+          anthracnose_pct: data.anthracnose_pct ?? 0,
+          previous_total: data.previous_total ?? 0,
+          total_change_pct: data.total_change_pct ?? 0,
+          daily: Array.isArray(data.daily) && data.daily.length ? data.daily : EMPTY_DAILY,
+          severity: {
+            leve: data.severity?.leve ?? 0,
+            moderada: data.severity?.moderada ?? 0,
+            severa: data.severity?.severa ?? 0,
+          },
+        });
       } catch {
         // AdminShell already validates auth
       }
@@ -38,6 +126,8 @@ function DashboardContent() {
 
     void load();
   }, []);
+
+  const confidenceDisplay = Math.round(stats.avg_confidence);
 
   return (
     <>
@@ -50,50 +140,57 @@ function DashboardContent() {
         </p>
       </div>
 
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-6">
-        <div className="rounded-lg bg-white p-4 shadow sm:p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-              <Activity className="h-6 w-6 text-blue-600" />
-            </div>
-            <TrendingUp className="h-5 w-5 text-gray-400" />
-          </div>
-          <p className="mb-1 text-sm text-gray-600">Total Detecciones</p>
-          <p className="text-3xl font-bold text-gray-900">{stats.total_detections}</p>
-        </div>
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-5">
+        <StatCard
+          icon={<Activity className="size-5 text-[#2563eb]" strokeWidth={2.25} aria-hidden />}
+          iconWrapClass="bg-[#dbeafe]"
+          badge={<TrendBadge value={stats.total_change_pct} emphasize />}
+          title="Total Detecciones"
+          value={stats.total_detections}
+          footnote={`vs. ${stats.previous_total} el periodo anterior`}
+        />
 
-        <div className="rounded-lg bg-white p-4 shadow sm:p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-              <CheckCircle className="h-6 w-6 text-green-600" />
-            </div>
-            <span className="text-sm text-gray-600">
-              {stats.total_detections > 0
-                ? `${((stats.healthy / stats.total_detections) * 100).toFixed(1)}%`
-                : '0%'}
-            </span>
-          </div>
-          <p className="mb-1 text-sm text-gray-600">Plantas Sanas</p>
-          <p className="text-3xl font-bold text-green-600">{stats.healthy}</p>
-        </div>
+        <StatCard
+          icon={<Check className="size-5 text-[#16a34a]" strokeWidth={2.5} aria-hidden />}
+          iconWrapClass="bg-[#dcfce7]"
+          badge={<span className="text-gray-500">{stats.healthy_pct.toFixed(1)}%</span>}
+          title="Naranjas Sanas"
+          value={stats.healthy}
+          footnote="del total analizado"
+        />
 
-        <div className="rounded-lg bg-white p-4 shadow sm:p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-              <AlertCircle className="h-6 w-6 text-red-600" />
-            </div>
-            <span className="text-sm text-gray-600">
-              {stats.total_detections > 0
-                ? `${((stats.anthracnose / stats.total_detections) * 100).toFixed(1)}%`
-                : '0%'}
+        <StatCard
+          icon={<CircleDot className="size-5 text-[#dc2626]" strokeWidth={2.25} aria-hidden />}
+          iconWrapClass="bg-[#fee2e2]"
+          badge={<TrendBadge value={stats.anthracnose_pct} emphasize />}
+          title="Con Antracnosis"
+          value={stats.anthracnose}
+          footnote={`${stats.severe} en etapa severa`}
+        />
+
+        <StatCard
+          icon={<Gauge className="size-5 text-[#d97706]" strokeWidth={2.25} aria-hidden />}
+          iconWrapClass="bg-[#ffedd5]"
+          badge={
+            <span className="text-emerald-600">
+              {stats.avg_confidence.toFixed(1)}%
             </span>
-          </div>
-          <p className="mb-1 text-sm text-gray-600">Con Antracnosis</p>
-          <p className="text-3xl font-bold text-red-600">{stats.anthracnose}</p>
-        </div>
+          }
+          title="Confianza promedio"
+          value={`${confidenceDisplay}%`}
+          footnote="del modelo YOLOv8"
+        />
       </div>
 
-      <div className="mt-8">
+      <AdminAnalyticsPanels
+        daily={stats.daily}
+        total={stats.total_detections}
+        healthy={stats.healthy}
+        anthracnose={stats.anthracnose}
+        severity={stats.severity}
+      />
+
+      <div className="mt-2">
         <h2 className="mb-4 text-xl font-bold text-gray-900">Acciones Rápidas</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <button

@@ -33,6 +33,9 @@ def _get_api_status() -> dict:
         "endpoints": [
             {"method": "GET", "path": "/api/health", "description": "Health check"},
             {"method": "POST", "path": "/api/auth/login", "description": "Autenticación admin"},
+            {"method": "GET", "path": "/api/auth/me", "description": "Perfil del administrador"},
+            {"method": "PUT", "path": "/api/auth/profile", "description": "Actualizar perfil"},
+            {"method": "POST", "path": "/api/auth/avatar", "description": "Subir foto de perfil"},
             {"method": "POST", "path": "/api/detect", "description": "Detección de antracnosis"},
             {"method": "GET", "path": "/api/admin/stats", "description": "Estadísticas"},
             {"method": "GET", "path": "/api/admin/system-status", "description": "Estado del sistema"},
