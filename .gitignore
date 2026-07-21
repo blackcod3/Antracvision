@@ -5,6 +5,7 @@ frontend/out/
 frontend/build/
 frontend/.vercel/
 frontend/.env*
+!frontend/.env.example
 
 # Backend
 backend/.env

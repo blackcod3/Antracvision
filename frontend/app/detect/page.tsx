@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Upload, AlertCircle, CheckCircle, Loader2, ArrowLeft, Crop } from 'lucide-react';
 import ImageCropEditor from '@/components/molecules/ImageCropEditor';
 import { Area, getCroppedImage } from '@/lib/cropImage';
+import { API_BASE } from '@/lib/api';
 
 interface DetectionResult {
   clase: string;
@@ -103,7 +104,7 @@ export default function DetectPage() {
       const formData = new FormData();
       formData.append('file', selectedFile);
 
-      const response = await fetch('http://localhost:8000/api/detect', {
+      const response = await fetch(`${API_BASE}/api/detect`, {
         method: 'POST',
         body: formData,
       });
