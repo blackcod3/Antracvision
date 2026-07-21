@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutGrid, Wrench, Eye, BarChart3, Crosshair, ChevronRight, LogOut, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { LayoutGrid, Wrench, Eye, BarChart3, Crosshair, ChevronDown, ChevronRight, LogOut, Menu, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { API_BASE } from '@/lib/api';
 
 type AdminSidebarProps = {
@@ -24,9 +24,20 @@ const generalItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutGrid, exact: true },
 ] as const;
 
+const detectionChildren = [
+  { href: '/detect', label: 'Nueva detección', exact: true },
+  { href: '/admin/detect/historial', label: 'Historial de detecciones' },
+] as const;
+
 const moduleItems = [
   { href: '/admin/maintenance', label: 'Mantenimiento', icon: Wrench },
-  { href: '/detect', label: 'Detección', icon: Eye, badgeKey: 'detection' as const },
+  {
+    href: '/detect',
+    label: 'Detección',
+    icon: Eye,
+    badgeKey: 'detection' as const,
+    children: detectionChildren,
+  },
   { href: '/admin/reports', label: 'Reportes', icon: BarChart3 },
   { href: '/admin/settings', label: 'Configuración', icon: Crosshair },
 ] as const;
@@ -34,6 +45,18 @@ const moduleItems = [
 function isActive(pathname: string, href: string, exact?: boolean) {
   if (exact) return pathname === href;
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function moduleIsActive(
+  pathname: string,
+  item: (typeof moduleItems)[number],
+) {
+  if ('children' in item && item.children) {
+    return item.children.some((child) =>
+      isActive(pathname, child.href, 'exact' in child ? child.exact : false),
+    );
+  }
+  return isActive(pathname, item.href);
 }
 
 export function AdminSidebar({
@@ -45,9 +68,17 @@ export function AdminSidebar({
 }: AdminSidebarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const detectionActive = detectionChildren.some((child) =>
+    isActive(pathname, child.href, 'exact' in child ? child.exact : false),
+  );
+  const [detectionOpen, setDetectionOpen] = useState(detectionActive);
   const initial = userName.trim().charAt(0).toUpperCase() || 'A';
   const photo = resolveAvatarUrl(avatarUrl);
   const profileActive = isActive(pathname, '/admin/profile');
+
+  useEffect(() => {
+    if (detectionActive) setDetectionOpen(true);
+  }, [detectionActive]);
 
   const nav = (
     <>
@@ -104,34 +135,86 @@ export function AdminSidebar({
           </p>
           <ul className="space-y-1">
             {moduleItems.map((item) => {
-              const active = isActive(pathname, item.href);
+              const active = moduleIsActive(pathname, item);
               const Icon = item.icon;
               const badge =
                 'badgeKey' in item && item.badgeKey === 'detection' && detectionBadge > 0
                   ? detectionBadge
                   : null;
+              const children = 'children' in item ? item.children : null;
+              const isCollapsible = Boolean(children);
+              const expanded = isCollapsible ? detectionOpen : false;
 
               return (
                 <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors duration-200 ${
-                      active
-                        ? 'bg-white/10 font-medium text-white'
-                        : 'text-[#d5e3db] hover:bg-white/5 hover:text-white'
-                    }`}
-                    aria-current={active ? 'page' : undefined}
-                  >
-                    <Icon className="size-[18px] shrink-0 opacity-90" aria-hidden />
-                    <span className="flex-1 truncate">{item.label}</span>
-                    {badge !== null ? (
-                      <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#e53935] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
-                        {badge > 99 ? '99+' : badge}
-                      </span>
-                    ) : null}
-                    <ChevronRight className="size-4 shrink-0 text-[#7d9688]" aria-hidden />
-                  </Link>
+                  {isCollapsible ? (
+                    <button
+                      type="button"
+                      onClick={() => setDetectionOpen((open) => !open)}
+                      aria-expanded={expanded}
+                      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors duration-200 ${
+                        active || expanded
+                          ? 'bg-white/10 font-medium text-white'
+                          : 'text-[#d5e3db] hover:bg-white/5 hover:text-white'
+                      }`}
+                    >
+                      <Icon className="size-[18px] shrink-0 opacity-90" aria-hidden />
+                      <span className="flex-1 truncate">{item.label}</span>
+                      {badge !== null ? (
+                        <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#e53935] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+                          {badge > 99 ? '99+' : badge}
+                        </span>
+                      ) : null}
+                      <ChevronDown
+                        className={`size-4 shrink-0 text-[#7d9688] transition-transform duration-200 ${
+                          expanded ? 'rotate-180' : ''
+                        }`}
+                        aria-hidden
+                      />
+                    </button>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors duration-200 ${
+                        active
+                          ? 'bg-white/10 font-medium text-white'
+                          : 'text-[#d5e3db] hover:bg-white/5 hover:text-white'
+                      }`}
+                      aria-current={active ? 'page' : undefined}
+                    >
+                      <Icon className="size-[18px] shrink-0 opacity-90" aria-hidden />
+                      <span className="flex-1 truncate">{item.label}</span>
+                      <ChevronRight className="size-4 shrink-0 text-[#7d9688]" aria-hidden />
+                    </Link>
+                  )}
+                  {isCollapsible && expanded && children ? (
+                    <ul className="mt-0.5 space-y-0.5 py-1 pl-11">
+                      {children.map((child) => {
+                        const childActive = isActive(
+                          pathname,
+                          child.href,
+                          'exact' in child ? child.exact : false,
+                        );
+                        return (
+                          <li key={`${child.href}-${child.label}`}>
+                            <Link
+                              href={child.href}
+                              onClick={() => setMobileOpen(false)}
+                              className={`block rounded-lg px-2 py-1.5 text-[13px] transition-colors duration-200 ${
+                                childActive
+                                  ? 'font-medium text-white'
+                                  : 'text-[#c5d4cc] hover:text-white'
+                              }`}
+                              aria-current={childActive ? 'page' : undefined}
+                            >
+                              {child.label}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  ) : null}
                 </li>
               );
             })}

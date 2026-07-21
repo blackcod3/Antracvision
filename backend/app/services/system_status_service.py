@@ -38,6 +38,7 @@ def _get_api_status() -> dict:
             {"method": "POST", "path": "/api/auth/avatar", "description": "Subir foto de perfil"},
             {"method": "POST", "path": "/api/detect", "description": "Detección de antracnosis"},
             {"method": "GET", "path": "/api/admin/stats", "description": "Estadísticas"},
+            {"method": "GET", "path": "/api/admin/detections", "description": "Historial de detecciones"},
             {"method": "GET", "path": "/api/admin/system-status", "description": "Estado del sistema"},
         ],
         "runtime": {
