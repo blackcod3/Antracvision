@@ -9,9 +9,11 @@ DAY_LABELS_ES = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
 
 @dataclass
 class DetectionEvent:
+    id: int
     clase: str
     confidence: float
     severity: str | None  # leve | moderado | crítico | None (sana)
+    source: str = "Imagen subida"  # Imagen subida | Cámara
     at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     @property
@@ -20,10 +22,24 @@ class DetectionEvent:
 
 
 _events: list[DetectionEvent] = []
+_next_id = 1
 PERIOD_DAYS = 7
 
+SEVERITY_LABELS = {
+    "crítico": "Severa",
+    "moderado": "Moderada",
+    "leve": "Leve",
+}
 
-def record_detection(clase: str, confidence: float = 0.0, estado: str | None = None) -> None:
+
+def record_detection(
+    clase: str,
+    confidence: float = 0.0,
+    estado: str | None = None,
+    source: str = "Imagen subida",
+) -> None:
+    global _next_id
+
     severity = None
     if clase == "Antracnosis":
         # Map detection estados to severity buckets
@@ -36,11 +52,57 @@ def record_detection(clase: str, confidence: float = 0.0, estado: str | None = N
 
     _events.append(
         DetectionEvent(
+            id=_next_id,
             clase=clase,
             confidence=float(confidence),
             severity=severity,
+            source=source if source in ("Imagen subida", "Cámara") else "Imagen subida",
         )
     )
+    _next_id += 1
+
+
+def _format_relative_date(at: datetime) -> str:
+    local = at.astimezone()
+    now = datetime.now().astimezone()
+    today = now.date()
+    day = local.date()
+    time_str = local.strftime("%H:%M")
+
+    if day == today:
+        return f"Hoy, {time_str}"
+    if day == today - timedelta(days=1):
+        return f"Ayer, {time_str}"
+
+    months = (
+        "ene", "feb", "mar", "abr", "may", "jun",
+        "jul", "ago", "sep", "oct", "nov", "dic",
+    )
+    return f"{day.day} {months[day.month - 1]}, {time_str}"
+
+
+def get_recent_detections(limit: int = 5) -> list[dict]:
+    recent = sorted(_events, key=lambda e: e.at, reverse=True)[:limit]
+    items: list[dict] = []
+    for event in recent:
+        if event.clase == "Sana":
+            status = "Sana"
+            label = "Sana"
+        else:
+            status = SEVERITY_LABELS.get(event.severity or "", "Leve")
+            label = "Antracnosis"
+
+        items.append(
+            {
+                "id": f"#DET-{event.id:04d}",
+                "label": label,
+                "origin": event.source,
+                "status": status,
+                "confidence": round(event.confidence * 100),
+                "date": _format_relative_date(event.at),
+            }
+        )
+    return items
 
 
 def _in_window(events: list[DetectionEvent], start: datetime, end: datetime) -> list[DetectionEvent]:
@@ -126,4 +188,5 @@ def get_stats() -> dict:
         "previous_total": previous_total,
         "total_change_pct": round(total_change_pct, 1),
         "daily": _daily_series(_events, PERIOD_DAYS),
+        "recent": get_recent_detections(5),
     }

@@ -3,11 +3,8 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { Activity, Check, CircleDot, Gauge, Triangle } from 'lucide-react';
-import {
-  AdminAnalyticsPanels,
-  type DailyPoint,
-  type SeverityCounts,
-} from '@/components/organisms/AdminAnalyticsPanels';
+import { AdminAnalyticsPanels, type DailyPoint, type SeverityCounts, } from '@/components/organisms/AdminAnalyticsPanels';
+import { RecentDetectionsPanel, type RecentDetection, } from '@/components/organisms/RecentDetectionsPanel';
 import { API_BASE, getAdminToken } from '@/components/organisms/AdminShell';
 
 type Stats = {
@@ -22,6 +19,7 @@ type Stats = {
   total_change_pct: number;
   daily: DailyPoint[];
   severity: SeverityCounts;
+  recent: RecentDetection[];
 };
 
 const EMPTY_DAILY: DailyPoint[] = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(
@@ -88,6 +86,7 @@ function DashboardContent() {
     total_change_pct: 0,
     daily: EMPTY_DAILY,
     severity: { leve: 0, moderada: 0, severa: 0 },
+    recent: [],
   });
   const router = useRouter();
 
@@ -118,6 +117,7 @@ function DashboardContent() {
             moderada: data.severity?.moderada ?? 0,
             severa: data.severity?.severa ?? 0,
           },
+          recent: Array.isArray(data.recent) ? data.recent : [],
         });
       } catch {
         // AdminShell already validates auth
@@ -189,6 +189,8 @@ function DashboardContent() {
         anthracnose={stats.anthracnose}
         severity={stats.severity}
       />
+
+      <RecentDetectionsPanel detections={stats.recent} />
 
       <div className="mt-2">
         <h2 className="mb-4 text-xl font-bold text-gray-900">Acciones Rápidas</h2>

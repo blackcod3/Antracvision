@@ -101,9 +101,9 @@ export default function Home() {
             </p>
           </div>
           <p className="w-full shrink-0 text-pretty text-xs leading-snug text-[#667766] sm:w-auto sm:max-w-none sm:text-sm sm:leading-relaxed sm:text-[15px] sm:text-right">
-            <span className="sm:hidden">© 2025 AntracVision</span>
+            <span className="sm:hidden">© 2026 AntracVision</span>
             <span className="hidden sm:inline">
-              © 2026 ANTRACVISION. Todos los derechos reservados.
+              © 2026 AntracVision. Todos los derechos reservados.
             </span>
           </p>
         </div>
