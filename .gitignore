@@ -15,6 +15,8 @@ backend/.venv/
 backend/__pycache__/
 backend/**/*.pyc
 backend/.pytest_cache/
+backend/uploads/
+backend/app/data/
 
 # Python general
 __pycache__/

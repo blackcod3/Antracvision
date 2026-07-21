@@ -4,7 +4,7 @@ import { FeatureCard } from '@/components/molecules/FeatureCard';
 
 export function FeatureGridSection() {
   return (
-    <section id="features" className="py-12 sm:py-16 md:py-20">
+    <section id="features" className="scroll-mt-24 py-12 sm:py-16 md:py-20 sm:scroll-mt-28">
       <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-14">
         <h2 className="mb-10 text-center text-2xl font-bold text-gray-900 sm:mb-14 sm:text-3xl md:text-4xl">
           ¿Por qué AntracVision?
