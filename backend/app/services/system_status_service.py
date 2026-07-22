@@ -1,8 +1,8 @@
 import os
 import platform
 import time
-from pathlib import Path
 
+from pathlib import Path
 from app.core import config
 
 _STARTED_AT = time.time()
@@ -94,7 +94,10 @@ def _get_model_status() -> dict:
 
 
 def _get_database_status() -> dict:
+    from app.db.session import check_database_connection
+
     database_url = config.DATABASE_URL
+    meta = config.parse_database_url(database_url)
 
     if not database_url:
         return {
@@ -103,30 +106,38 @@ def _get_database_status() -> dict:
             "connected": False,
             "engine": None,
             "host": None,
+            "port": None,
             "database": None,
-            "detail": "No hay DATABASE_URL configurada. Las estadísticas se mantienen en memoria y se reinician al reiniciar el servidor.",
-            "storage_mode": "in_memory",
+            "detail": "No hay DATABASE_URL configurada.",
+            "storage_mode": "disconnected",
         }
 
-    # Future: probe real DB when DATABASE_URL is configured
-    masked = database_url
-    if "@" in database_url:
-        scheme, rest = database_url.split("://", 1) if "://" in database_url else ("", database_url)
-        user_host = rest.split("@", 1)[-1]
-        masked = f"{scheme}://***@{user_host}" if scheme else f"***@{user_host}"
-
-    engine = database_url.split("://", 1)[0] if "://" in database_url else "unknown"
+    connected, error = check_database_connection()
+    if connected:
+        return {
+            "status": "operational",
+            "label": "Conectada",
+            "connected": True,
+            "engine": meta["engine"],
+            "host": meta["host"],
+            "port": meta["port"],
+            "database": meta["database"],
+            "url_masked": meta["masked"],
+            "detail": "PostgreSQL operativo. Usuarios, roles y detecciones persistidos.",
+            "storage_mode": "postgresql",
+        }
 
     return {
-        "status": "configured",
-        "label": "Configurada",
+        "status": "error",
+        "label": "Error de conexión",
         "connected": False,
-        "engine": engine,
-        "url_masked": masked,
-        "host": None,
-        "database": None,
-        "detail": "DATABASE_URL está definida, pero la integración de persistencia aún no está activa.",
-        "storage_mode": "configured_pending",
+        "engine": meta["engine"],
+        "host": meta["host"],
+        "port": meta["port"],
+        "database": meta["database"],
+        "url_masked": meta["masked"],
+        "detail": f"No se pudo conectar a la base de datos: {error}",
+        "storage_mode": "error",
     }
 
 
@@ -135,21 +146,19 @@ def get_system_status() -> dict:
     model = _get_model_status()
     database = _get_database_status()
 
-    components = [api["status"], model["status"], database["status"]]
-    if all(s in ("operational", "configured") for s in components) and database["status"] == "operational":
+    if api["status"] == "operational" and model["status"] == "operational" and database["status"] == "operational":
         overall = "operational"
         overall_label = "Todo operativo"
     elif api["status"] == "operational" and model["status"] == "operational":
         overall = "degraded"
         overall_label = "Operativo con limitaciones"
+        if database["status"] == "disconnected":
+            overall_label = "Operativo sin base de datos"
+        elif database["status"] == "error":
+            overall_label = "Operativo con error de base de datos"
     else:
         overall = "error"
         overall_label = "Con incidencias"
-
-    # Without DB, degraded is expected and OK
-    if api["status"] == "operational" and model["status"] == "operational" and database["status"] == "disconnected":
-        overall = "degraded"
-        overall_label = "Operativo sin base de datos"
 
     return {
         "overall": {

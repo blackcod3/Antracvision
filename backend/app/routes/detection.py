@@ -2,9 +2,9 @@ from datetime import datetime, timezone
 
 import io
 import numpy as np
+
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from PIL import Image
-
 from app.schemas.detection_schema import DetectionResponse
 from app.services.detection_service import predict_image
 from app.services.stats_service import record_detection
@@ -13,7 +13,6 @@ router = APIRouter(prefix="/api", tags=["Detection"])
 
 @router.post("/detect")
 async def detect(file: UploadFile = File(...)):
-
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Archivo inválido: se requiere una imagen")
 
@@ -41,9 +40,14 @@ async def detect(file: UploadFile = File(...)):
             estado = "leve"
             recomendacion = "Monitorear la evolución y retirar frutos sospechosos; mejorar condiciones de cultivo."
 
-    record_detection(clase, probabilidad, estado)
+    record_detection(
+        clase,
+        probabilidad,
+        estado,
+        recomendacion=recomendacion,
+    )
 
-    resp = DetectionResponse(
+    return DetectionResponse(
         clase=clase,
         probabilidad=probabilidad,
         confianza_porcentaje=f"{probabilidad * 100:.2f}%",
@@ -51,4 +55,3 @@ async def detect(file: UploadFile = File(...)):
         recomendacion=recomendacion,
         timestamp=datetime.now(timezone.utc).isoformat(),
     )
-    return resp
