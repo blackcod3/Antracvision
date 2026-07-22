@@ -1,22 +1,21 @@
 'use client';
 
-export default function MaintenancePage() {
-  return (
-    <>
-      <div className="mb-6 sm:mb-8">
-        <h1 className="mb-2 text-balance text-2xl font-bold text-gray-900 sm:text-3xl">
-          Mantenimiento
-        </h1>
-        <p className="text-pretty text-sm text-gray-600 sm:text-base">
-          Herramientas de soporte y administración del sistema
-        </p>
-      </div>
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-      <div className="rounded-2xl border border-black/[0.04] bg-white p-6 shadow-[0_1px_3px_rgba(16,24,40,0.06)] sm:p-8">
-        <p className="text-sm text-gray-500">
-          Próximamente: opciones de mantenimiento del sistema.
-        </p>
+export default function MaintenancePage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace('/admin/maintenance/users');
+  }, [router]);
+
+  return (
+    <div className="flex items-center justify-center py-20">
+      <div className="text-center">
+        <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-b-2 border-green-600" />
+        <p className="text-sm text-gray-600">Cargando mantenimiento…</p>
       </div>
-    </>
+    </div>
   );
 }

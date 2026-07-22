@@ -1,5 +1,6 @@
 from __future__ import annotations
 from datetime import datetime, timedelta, timezone
+from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.db.models import Detection
@@ -21,6 +22,7 @@ def record_detection(
     estado: str | None = None,
     source: str = "Imagen subida",
     recomendacion: str | None = None,
+    image_url: str | None = None,
     user_id: int | None = None,
     db: Session | None = None,
 ) -> Detection:
@@ -43,6 +45,8 @@ def record_detection(
             source=source if source in ("Imagen subida", "Cámara") else "Imagen subida",
             estado=estado,
             recomendacion=recomendacion,
+            image_url=image_url,
+            is_active=True,
             user_id=user_id,
         )
         session.add(event)
@@ -78,8 +82,36 @@ def _format_relative_date(at: datetime) -> str:
     return f"{day.day} {months[day.month - 1]}, {time_str}"
 
 
+def _serialize_detection(event: Detection) -> dict:
+    if event.clase == "Sana":
+        status = "Sana"
+        label = "Sana"
+    else:
+        status = SEVERITY_LABELS.get(event.severity or "", "Leve")
+        label = "Antracnosis"
+
+    return {
+        "id": event.id,
+        "code": f"#DET-{event.id:04d}",
+        "label": label,
+        "origin": event.source,
+        "status": status,
+        "confidence": round(event.confidence * 100),
+        "date": _format_relative_date(event.created_at),
+        "image_url": event.image_url,
+        "recomendacion": event.recomendacion,
+        "estado": event.estado,
+    }
+
+
+def _active_query():
+    return select(Detection).where(Detection.is_active.is_(True))
+
+
 def _as_list(db: Session) -> list[Detection]:
-    return list(db.scalars(select(Detection).order_by(Detection.created_at.asc())).all())
+    return list(
+        db.scalars(_active_query().order_by(Detection.created_at.asc())).all()
+    )
 
 
 def get_recent_detections(limit: int = 5, db: Session | None = None) -> list[dict]:
@@ -88,32 +120,29 @@ def get_recent_detections(limit: int = 5, db: Session | None = None) -> list[dic
     try:
         recent = list(
             session.scalars(
-                select(Detection).order_by(Detection.created_at.desc()).limit(limit)
+                _active_query().order_by(Detection.created_at.desc()).limit(limit)
             ).all()
         )
-        items: list[dict] = []
-        for event in recent:
-            if event.clase == "Sana":
-                status = "Sana"
-                label = "Sana"
-            else:
-                status = SEVERITY_LABELS.get(event.severity or "", "Leve")
-                label = "Antracnosis"
-
-            items.append(
-                {
-                    "id": f"#DET-{event.id:04d}",
-                    "label": label,
-                    "origin": event.source,
-                    "status": status,
-                    "confidence": round(event.confidence * 100),
-                    "date": _format_relative_date(event.created_at),
-                }
-            )
-        return items
+        return [_serialize_detection(event) for event in recent]
     finally:
         if owns_session:
             session.close()
+
+
+def get_detection_by_id(db: Session, detection_id: int) -> Detection:
+    event = db.scalar(
+        select(Detection).where(Detection.id == detection_id, Detection.is_active.is_(True))
+    )
+    if event is None:
+        raise HTTPException(status_code=404, detail="Detección no encontrada")
+    return event
+
+
+def soft_delete_detection(db: Session, detection_id: int) -> None:
+    event = get_detection_by_id(db, detection_id)
+    event.is_active = False
+    db.add(event)
+    db.commit()
 
 
 def _in_window(events: list[Detection], start: datetime, end: datetime) -> list[Detection]:

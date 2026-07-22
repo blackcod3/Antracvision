@@ -38,6 +38,7 @@ app.add_middleware(
 uploads_dir = Path(__file__).resolve().parent / "uploads"
 uploads_dir.mkdir(parents=True, exist_ok=True)
 (uploads_dir / "avatars").mkdir(parents=True, exist_ok=True)
+(uploads_dir / "detections").mkdir(parents=True, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=str(uploads_dir)), name="uploads")
 
 app.include_router(auth.router)

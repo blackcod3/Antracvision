@@ -197,7 +197,7 @@ function DashboardContent() {
         <div className="grid gap-4 sm:grid-cols-2">
           <button
             type="button"
-            onClick={() => router.push('/detect')}
+            onClick={() => router.push('/admin/detect')}
             className="rounded-lg bg-white p-5 text-left shadow transition hover:shadow-lg active:bg-gray-50 sm:p-6"
           >
             <h3 className="mb-2 font-bold text-gray-900">Probar Detección</h3>
