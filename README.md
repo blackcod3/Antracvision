@@ -10,18 +10,21 @@ Bachiller en Ingeniería de Sistemas e Informática
 
 ```
 Antracvision/
-├── backend/          # API FastAPI + modelo YOLOV8
+├── docker-compose.yml   # PostgreSQL 17
+├── backend/             # API FastAPI + modelo YOLOV8
+│   ├── alembic/         # Migraciones
 │   ├── app/
-│   │   ├── core/     # Config, seguridad, carga del modelo
-│   │   ├── models/   # Pesos del modelo (.pt)
-│   │   ├── routes/   # Auth, detección, health, admin
+│   │   ├── core/        # Config, seguridad, carga del modelo
+│   │   ├── db/          # Engine, modelos ORM, seed
+│   │   ├── models/      # Pesos del modelo (.pt)
+│   │   ├── routes/      # Auth, detección, health, admin
 │   │   ├── schemas/
 │   │   └── services/
 │   ├── main.py
 │   ├── requirements.txt
 │   └── Dockerfile
-└── frontend/         # App Next.js (App Router)
-    ├── app/          # Páginas: inicio, detect, login, admin, antracnosis
+└── frontend/            # App Next.js (App Router)
+    ├── app/             # Páginas: inicio, detect, login, admin, antracnosis
     ├── components/
     └── lib/
 ```
@@ -30,7 +33,30 @@ Antracvision/
 
 - **Backend:** Python 3.11+ (recomendado 3.13 para Docker), `pip` / venv
 - **Frontend:** Node.js 20+ y npm
+- **Base de datos:** PostgreSQL 17 (recomendado vía Docker Compose)
 - Modelo YOLOV8 en `backend/app/models/` (ruta configurable con `MODEL_PATH`)
+
+---
+
+## Base de datos (PostgreSQL 17)
+
+Desde la raíz del proyecto:
+
+```bash
+docker compose up -d
+```
+
+Esto levanta Postgres 17 en el puerto **5433** con usuario/DB `antracvision`.
+
+Migraciones (opcional; el arranque del API también crea tablas y hace seed):
+
+```bash
+cd backend
+source .venv/bin/activate
+alembic upgrade head
+```
+
+Tablas: `roles`, `users`, `detections`. Roles semilla: `Administrador`, `Operador`. Usuario admin desde `ADMIN_*` del `.env`.
 
 ---
 
@@ -47,11 +73,11 @@ pip install -r requirements.txt
 
 ### Variables de entorno
 
-Crea `backend/.env` (no se versiona):
+Crea `backend/.env` (no se versiona) a partir de `backend/.env.example`:
 
 ```env
 APP_NAME=API Detección de Antracnosis
-APP_VERSION=1.0.0
+APP_VERSION=1.2.0
 
 SECRET_KEY=cambia-esta-clave
 ALGORITHM=HS256
@@ -59,9 +85,13 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=tu-password
+ADMIN_EMAIL=admin@antracvision.com
+ADMIN_FULL_NAME=Administrador
 
 MODEL_PATH=app/models/yolov8_cls_best.pt
 FRONTEND_URL=http://localhost:3000
+
+DATABASE_URL=postgresql+psycopg://antracvision:antracvision@127.0.0.1:5433/antracvision
 ```
 
 ### Arranque en desarrollo
@@ -81,11 +111,12 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 |--------|------|-------------|
 | `GET` | `/api/health` | Estado del servicio |
 | `POST` | `/api/detect` | Detección a partir de una imagen |
-| `POST` | `/api/auth/login` | Login de administrador |
+| `POST` | `/api/auth/login` | Login (usuarios en PostgreSQL) |
 | `GET` | `/api/admin/stats` | Estadísticas (protegido) |
+| `GET` | `/api/admin/detections` | Historial (protegido) |
 | `GET` | `/api/admin/system-status` | Estado del sistema (protegido) |
 
-### Docker
+### Docker (API)
 
 ```bash
 cd backend
