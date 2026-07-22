@@ -14,6 +14,21 @@ type AdminSidebarProps = {
   onLogout: () => void;
 };
 
+type NavChild = {
+  href: string;
+  label: string;
+  exact?: boolean;
+};
+
+type ModuleItem = {
+  key: string;
+  href: string;
+  label: string;
+  icon: typeof LayoutGrid;
+  badgeKey?: 'detection';
+  children?: readonly NavChild[];
+};
+
 function resolveAvatarUrl(url?: string | null) {
   if (!url) return null;
   if (url.startsWith('http')) return url;
@@ -24,37 +39,43 @@ const generalItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutGrid, exact: true },
 ] as const;
 
-const detectionChildren = [
-  { href: '/detect', label: 'Nueva detección', exact: true },
-  { href: '/admin/detect/historial', label: 'Historial de detecciones' },
-] as const;
+const maintenanceChildren: readonly NavChild[] = [
+  { href: '/admin/maintenance/users', label: 'Usuarios' },
+];
 
-const moduleItems = [
-  { href: '/admin/maintenance', label: 'Mantenimiento', icon: Wrench },
+const detectionChildren: readonly NavChild[] = [
+  { href: '/admin/detect', label: 'Nueva detección', exact: true },
+  { href: '/admin/detect/historial', label: 'Historial de detecciones' },
+];
+
+const moduleItems: readonly ModuleItem[] = [
   {
-    href: '/detect',
+    key: 'detection',
+    href: '/admin/detect',
     label: 'Detección',
     icon: Eye,
-    badgeKey: 'detection' as const,
+    badgeKey: 'detection',
     children: detectionChildren,
   },
-  { href: '/admin/reports', label: 'Reportes', icon: BarChart3 },
-  { href: '/admin/settings', label: 'Configuración', icon: Crosshair },
-] as const;
+  { key: 'reports', href: '/admin/reports', label: 'Reportes', icon: BarChart3 },
+  {
+    key: 'maintenance',
+    href: '/admin/maintenance',
+    label: 'Mantenimiento',
+    icon: Wrench,
+    children: maintenanceChildren,
+  },
+  { key: 'settings', href: '/admin/settings', label: 'Configuración', icon: Crosshair },
+];
 
 function isActive(pathname: string, href: string, exact?: boolean) {
   if (exact) return pathname === href;
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function moduleIsActive(
-  pathname: string,
-  item: (typeof moduleItems)[number],
-) {
-  if ('children' in item && item.children) {
-    return item.children.some((child) =>
-      isActive(pathname, child.href, 'exact' in child ? child.exact : false),
-    );
+function moduleIsActive(pathname: string, item: ModuleItem) {
+  if (item.children?.length) {
+    return item.children.some((child) => isActive(pathname, child.href, child.exact));
   }
   return isActive(pathname, item.href);
 }
@@ -68,17 +89,27 @@ export function AdminSidebar({
 }: AdminSidebarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const detectionActive = detectionChildren.some((child) =>
-    isActive(pathname, child.href, 'exact' in child ? child.exact : false),
-  );
-  const [detectionOpen, setDetectionOpen] = useState(detectionActive);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const initial = userName.trim().charAt(0).toUpperCase() || 'A';
   const photo = resolveAvatarUrl(avatarUrl);
   const profileActive = isActive(pathname, '/admin/profile');
 
   useEffect(() => {
-    if (detectionActive) setDetectionOpen(true);
-  }, [detectionActive]);
+    setExpanded((prev) => {
+      const next = { ...prev };
+      for (const item of moduleItems) {
+        if (!item.children?.length) continue;
+        if (moduleIsActive(pathname, item)) {
+          next[item.key] = true;
+        }
+      }
+      return next;
+    });
+  }, [pathname]);
+
+  const toggleExpanded = (key: string) => {
+    setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const nav = (
     <>
@@ -138,22 +169,20 @@ export function AdminSidebar({
               const active = moduleIsActive(pathname, item);
               const Icon = item.icon;
               const badge =
-                'badgeKey' in item && item.badgeKey === 'detection' && detectionBadge > 0
-                  ? detectionBadge
-                  : null;
-              const children = 'children' in item ? item.children : null;
-              const isCollapsible = Boolean(children);
-              const expanded = isCollapsible ? detectionOpen : false;
+                item.badgeKey === 'detection' && detectionBadge > 0 ? detectionBadge : null;
+              const children = item.children;
+              const isCollapsible = Boolean(children?.length);
+              const isOpen = isCollapsible ? Boolean(expanded[item.key]) : false;
 
               return (
-                <li key={item.href}>
+                <li key={item.key}>
                   {isCollapsible ? (
                     <button
                       type="button"
-                      onClick={() => setDetectionOpen((open) => !open)}
-                      aria-expanded={expanded}
+                      onClick={() => toggleExpanded(item.key)}
+                      aria-expanded={isOpen}
                       className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors duration-200 ${
-                        active || expanded
+                        active || isOpen
                           ? 'bg-white/10 font-medium text-white'
                           : 'text-[#d5e3db] hover:bg-white/5 hover:text-white'
                       }`}
@@ -167,7 +196,7 @@ export function AdminSidebar({
                       ) : null}
                       <ChevronDown
                         className={`size-4 shrink-0 text-[#7d9688] transition-transform duration-200 ${
-                          expanded ? 'rotate-180' : ''
+                          isOpen ? 'rotate-180' : ''
                         }`}
                         aria-hidden
                       />
@@ -188,14 +217,10 @@ export function AdminSidebar({
                       <ChevronRight className="size-4 shrink-0 text-[#7d9688]" aria-hidden />
                     </Link>
                   )}
-                  {isCollapsible && expanded && children ? (
+                  {isCollapsible && isOpen && children ? (
                     <ul className="mt-0.5 space-y-0.5 py-1 pl-11">
                       {children.map((child) => {
-                        const childActive = isActive(
-                          pathname,
-                          child.href,
-                          'exact' in child ? child.exact : false,
-                        );
+                        const childActive = isActive(pathname, child.href, child.exact);
                         return (
                           <li key={`${child.href}-${child.label}`}>
                             <Link

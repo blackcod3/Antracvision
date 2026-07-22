@@ -17,11 +17,24 @@ type AdminShellProps = {
   children: ReactNode;
 };
 
+const DETECTION_SEEN_KEY = 'detection_anthracnose_seen';
+
+function getSeenAnthracnoseCount(): number {
+  const raw = localStorage.getItem(DETECTION_SEEN_KEY);
+  const value = raw ? Number(raw) : 0;
+  return Number.isFinite(value) && value >= 0 ? value : 0;
+}
+
+function unreadDetectionBadge(anthracnose: number): number {
+  return Math.max(0, anthracnose - getSeenAnthracnoseCount());
+}
+
 export function AdminShell({ children }: AdminShellProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [loading, setLoading] = useState(true);
   const [detectionBadge, setDetectionBadge] = useState(0);
+  const [anthracnoseTotal, setAnthracnoseTotal] = useState<number | null>(null);
   const [profile, setProfile] = useState<AdminProfile | null>(null);
 
   useEffect(() => {
@@ -48,7 +61,9 @@ export function AdminShell({ children }: AdminShellProps) {
 
         const stats = await statsRes.json();
         const me = (await meRes.json()) as AdminProfile;
-        setDetectionBadge(stats.anthracnose ?? 0);
+        const anthracnose = stats.anthracnose ?? 0;
+        setAnthracnoseTotal(anthracnose);
+        setDetectionBadge(unreadDetectionBadge(anthracnose));
         setProfile(me);
       } catch {
         localStorage.removeItem('token');
@@ -61,6 +76,14 @@ export function AdminShell({ children }: AdminShellProps) {
 
     void load();
   }, [router]);
+
+  // Clear the Detección badge once the user opens the history page.
+  useEffect(() => {
+    if (!pathname.startsWith('/admin/detect/historial')) return;
+    if (anthracnoseTotal === null) return;
+    localStorage.setItem(DETECTION_SEEN_KEY, String(anthracnoseTotal));
+    setDetectionBadge(0);
+  }, [pathname, anthracnoseTotal]);
 
   useEffect(() => {
     const onProfileUpdated = (event: Event) => {

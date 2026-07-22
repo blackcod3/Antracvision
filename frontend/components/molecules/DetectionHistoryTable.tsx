@@ -1,21 +1,27 @@
 'use client';
 
-import { Check, ShieldAlert } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { Check, Eye, ShieldAlert, X } from 'lucide-react';
 
 export type DetectionStatus = 'Severa' | 'Moderada' | 'Leve' | 'Sana';
 
 export type RecentDetection = {
-  id: string;
+  id: number;
+  code: string;
   label: string;
   origin: string;
   status: DetectionStatus;
   confidence: number;
   date: string;
+  image_url?: string | null;
+  recomendacion?: string | null;
+  estado?: string | null;
 };
 
 export const SAMPLE_DETECTIONS: RecentDetection[] = [
   {
-    id: '#DET-0007',
+    id: 7,
+    code: '#DET-0007',
     label: 'Antracnosis',
     origin: 'Imagen subida',
     status: 'Severa',
@@ -23,7 +29,8 @@ export const SAMPLE_DETECTIONS: RecentDetection[] = [
     date: 'Hoy, 09:41',
   },
   {
-    id: '#DET-0006',
+    id: 6,
+    code: '#DET-0006',
     label: 'Sana',
     origin: 'Cámara',
     status: 'Sana',
@@ -31,7 +38,8 @@ export const SAMPLE_DETECTIONS: RecentDetection[] = [
     date: 'Hoy, 08:15',
   },
   {
-    id: '#DET-0005',
+    id: 5,
+    code: '#DET-0005',
     label: 'Antracnosis',
     origin: 'Imagen subida',
     status: 'Moderada',
@@ -39,7 +47,8 @@ export const SAMPLE_DETECTIONS: RecentDetection[] = [
     date: 'Ayer, 17:02',
   },
   {
-    id: '#DET-0004',
+    id: 4,
+    code: '#DET-0004',
     label: 'Antracnosis',
     origin: 'Cámara',
     status: 'Leve',
@@ -47,7 +56,8 @@ export const SAMPLE_DETECTIONS: RecentDetection[] = [
     date: 'Ayer, 11:47',
   },
   {
-    id: '#DET-0003',
+    id: 3,
+    code: '#DET-0003',
     label: 'Antracnosis',
     origin: 'Imagen subida',
     status: 'Severa',
@@ -96,11 +106,43 @@ function ConfidenceCell({ value }: { value: number }) {
   );
 }
 
+function ActionButton({
+  label,
+  onClick,
+  className,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  className: string;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      title={label}
+      aria-label={label}
+      onClick={onClick}
+      className={`inline-flex size-8 items-center justify-center rounded-lg transition ${className}`}
+    >
+      {children}
+    </button>
+  );
+}
+
 type DetectionHistoryTableProps = {
   detections: RecentDetection[];
+  onView?: (detection: RecentDetection) => void;
+  onDelete?: (detection: RecentDetection) => void;
 };
 
-export function DetectionHistoryTable({ detections }: DetectionHistoryTableProps) {
+export function DetectionHistoryTable({
+  detections,
+  onView,
+  onDelete,
+}: DetectionHistoryTableProps) {
+  const showActions = Boolean(onView || onDelete);
+
   if (!detections.length) {
     return (
       <p className="px-5 py-10 text-center text-sm text-gray-500 sm:px-6">
@@ -109,15 +151,20 @@ export function DetectionHistoryTable({ detections }: DetectionHistoryTableProps
     );
   }
 
+  const headings = ['Detección', 'Origen', 'Estado', 'Confianza', 'Fecha'];
+  if (showActions) headings.push('Acciones');
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[640px] border-collapse text-left">
         <thead>
           <tr className="border-b border-gray-100">
-            {['Detección', 'Origen', 'Estado', 'Confianza', 'Fecha'].map((heading) => (
+            {headings.map((heading) => (
               <th
                 key={heading}
-                className="px-5 py-3 text-[11px] font-medium uppercase tracking-wider text-gray-400 sm:px-6"
+                className={`px-5 py-3 text-[11px] font-medium uppercase tracking-wider text-gray-400 sm:px-6 ${
+                  heading === 'Acciones' ? 'text-right' : ''
+                }`}
               >
                 {heading}
               </th>
@@ -132,7 +179,7 @@ export function DetectionHistoryTable({ detections }: DetectionHistoryTableProps
                   <DetectionIcon status={row.status} />
                   <div className="min-w-0">
                     <p className="font-semibold text-gray-950">{row.label}</p>
-                    <p className="text-sm text-gray-400">{row.id}</p>
+                    <p className="text-sm text-gray-400">{row.code}</p>
                   </div>
                 </div>
               </td>
@@ -148,6 +195,30 @@ export function DetectionHistoryTable({ detections }: DetectionHistoryTableProps
                 <ConfidenceCell value={row.confidence} />
               </td>
               <td className="px-5 py-4 text-sm text-gray-600 sm:px-6">{row.date}</td>
+              {showActions ? (
+                <td className="px-5 py-4 sm:px-6">
+                  <div className="flex items-center justify-end gap-1">
+                    {onView ? (
+                      <ActionButton
+                        label="Ver detalle"
+                        onClick={() => onView(row)}
+                        className="text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                      >
+                        <Eye className="size-4" aria-hidden />
+                      </ActionButton>
+                    ) : null}
+                    {onDelete ? (
+                      <ActionButton
+                        label="Eliminar"
+                        onClick={() => onDelete(row)}
+                        className="text-red-600 hover:bg-red-50"
+                      >
+                        <X className="size-4" aria-hidden />
+                      </ActionButton>
+                    ) : null}
+                  </div>
+                </td>
+              ) : null}
             </tr>
           ))}
         </tbody>
