@@ -22,9 +22,26 @@ ADMIN_FULL_NAME = os.getenv("ADMIN_FULL_NAME", "Administrador")
 MODEL_PATH = os.getenv("MODEL_PATH", "app/models/yolov8_cls_best.pt")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql+psycopg://antracvision:antracvision@127.0.0.1:5433/antracvision",
+def _normalize_database_url(url: str) -> str:
+    """Force SQLAlchemy to use psycopg3 (not psycopg2).
+
+    Platforms like Railway inject postgres:// or postgresql:// URLs; without an
+    explicit dialect SQLAlchemy defaults to psycopg2, which is not installed.
+    """
+    if url.startswith("postgres://"):
+        return "postgresql+psycopg://" + url[len("postgres://") :]
+    if url.startswith("postgresql+psycopg2://"):
+        return "postgresql+psycopg://" + url[len("postgresql+psycopg2://") :]
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url[len("postgresql://") :]
+    return url
+
+
+DATABASE_URL = _normalize_database_url(
+    os.getenv(
+        "DATABASE_URL",
+        "postgresql+psycopg://antracvision:antracvision@127.0.0.1:5433/antracvision",
+    )
 )
 
 
