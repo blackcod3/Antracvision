@@ -46,25 +46,31 @@ export function AdminShell({ children }: AdminShellProps) {
 
     const load = async () => {
       try {
-        const [statsRes, meRes] = await Promise.all([
-          fetch(`${API_BASE}/api/admin/stats`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch(`${API_BASE}/api/auth/me`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
+        const meRes = await fetch(`${API_BASE}/api/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-        if (!statsRes.ok || !meRes.ok) {
+        if (!meRes.ok) {
           throw new Error('Token inválido');
         }
 
-        const stats = await statsRes.json();
         const me = (await meRes.json()) as AdminProfile;
-        const anthracnose = stats.anthracnose ?? 0;
-        setAnthracnoseTotal(anthracnose);
-        setDetectionBadge(unreadDetectionBadge(anthracnose));
         setProfile(me);
+
+        // Badge is best-effort; stats failures must not force logout.
+        try {
+          const statsRes = await fetch(`${API_BASE}/api/admin/stats`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (statsRes.ok) {
+            const stats = await statsRes.json();
+            const anthracnose = stats.anthracnose ?? 0;
+            setAnthracnoseTotal(anthracnose);
+            setDetectionBadge(unreadDetectionBadge(anthracnose));
+          }
+        } catch {
+          // ignore stats errors
+        }
       } catch {
         localStorage.removeItem('token');
         router.push('/login');
