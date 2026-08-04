@@ -236,13 +236,13 @@ export function AdminAnalyticsPanels({
             <div className="space-y-3.5">
               <SeverityBar label="Leve" value={severity.leve} max={severityMax} color={MILD} />
               <SeverityBar
-                label="Moderada"
+                label="Moderado"
                 value={severity.moderada}
                 max={severityMax}
                 color={MODERATE}
               />
               <SeverityBar
-                label="Severa"
+                label="Crítico"
                 value={severity.severa}
                 max={severityMax}
                 color={SEVERE}
