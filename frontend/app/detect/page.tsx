@@ -41,7 +41,7 @@ export default function DetectPage() {
             Detección de Antracnosis
           </h1>
           <p className="mb-8 text-center text-base text-pretty text-gray-600 md:text-lg">
-            Sube una imagen del fruto de la naranja, recórtala si lo necesitas y detecta antracnosis
+            Toma una foto o sube una imagen del fruto, recórtala si lo necesitas y detecta antracnosis
           </p>
           <DetectionWorkspace variant="public" />
         </div>
