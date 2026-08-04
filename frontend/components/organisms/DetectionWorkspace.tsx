@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { AlertCircle, CheckCircle, Crop, Loader2, Upload } from 'lucide-react';
+import { AlertCircle, Camera, CheckCircle, Crop, ImagePlus, Loader2, Upload } from 'lucide-react';
 import ImageCropEditor from '@/components/molecules/ImageCropEditor';
 import { Area, getCroppedImage } from '@/lib/cropImage';
 import { API_BASE } from '@/lib/api';
@@ -46,10 +46,16 @@ export function DetectionWorkspace({ variant = 'public' }: DetectionWorkspacePro
   const [result, setResult] = useState<DetectionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const isAdmin = variant === 'admin';
 
   const revokeUrl = (url: string | null) => {
     if (url) URL.revokeObjectURL(url);
+  };
+
+  const clearFileInputs = () => {
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (cameraInputRef.current) cameraInputRef.current.value = '';
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,7 +67,7 @@ export function DetectionWorkspace({ variant = 'public' }: DetectionWorkspacePro
 
     const objectUrl = URL.createObjectURL(file);
     setSourceImageUrl(objectUrl);
-    setSourceFileName(file.name);
+    setSourceFileName(file.name || 'captura.jpg');
     setSelectedFile(null);
     setPreviewUrl(null);
     setIsEditing(true);
@@ -101,9 +107,7 @@ export function DetectionWorkspace({ variant = 'public' }: DetectionWorkspacePro
     revokeUrl(sourceImageUrl);
     setSourceImageUrl(null);
     setIsEditing(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    clearFileInputs();
   };
 
   const handleReEdit = () => {
@@ -159,9 +163,7 @@ export function DetectionWorkspace({ variant = 'public' }: DetectionWorkspacePro
     setIsEditing(false);
     setResult(null);
     setError(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    clearFileInputs();
   };
 
   const panelClass = isAdmin
@@ -186,19 +188,8 @@ export function DetectionWorkspace({ variant = 'public' }: DetectionWorkspacePro
         ) : (
           <>
             <div className="mb-8">
-              <div
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    fileInputRef.current?.click();
-                  }
-                }}
-                className="cursor-pointer rounded-lg border-2 border-dashed border-gray-300 px-4 py-10 text-center touch-manipulation transition hover:border-green-500 min-[480px]:px-8 md:min-h-0 md:p-8"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                {previewUrl ? (
+              {previewUrl ? (
+                <div className="rounded-lg border-2 border-dashed border-green-400 px-4 py-6 text-center min-[480px]:px-8 md:p-8">
                   <div className="space-y-4">
                     <img
                       src={previewUrl}
@@ -209,34 +200,56 @@ export function DetectionWorkspace({ variant = 'public' }: DetectionWorkspacePro
                       {selectedFile?.name}
                     </p>
                   </div>
-                ) : (
-                  <div className="space-y-4">
+                </div>
+              ) : (
+                <div className="rounded-lg border-2 border-dashed border-gray-300 px-4 py-10 text-center min-[480px]:px-8 md:min-h-0 md:p-8">
+                  <div className="space-y-5">
                     <Upload
                       className="mx-auto h-14 w-14 text-gray-400 md:h-16 md:w-16"
                       aria-hidden
                     />
                     <div className="px-1">
                       <p className="text-base font-semibold text-gray-700 md:text-lg">
-                        <span className="md:hidden">Toca para subir una imagen</span>
-                        <span className="hidden md:inline">Haz clic para subir una imagen</span>
+                        Sube o captura una imagen del fruto
                       </p>
-                      <p className="mt-1 text-sm text-gray-500">
-                        <span className="md:hidden">PNG o JPG hasta 10&nbsp;MB</span>
-                        <span className="hidden md:inline">
-                          o arrastra y suelta (PNG, JPG hasta 10MB)
-                        </span>
-                      </p>
+                      <p className="mt-1 text-sm text-gray-500">PNG o JPG hasta 10&nbsp;MB</p>
                       <p className="mt-2 text-sm text-green-700">
                         Podrás recortar y redimensionar antes de analizar
                       </p>
                     </div>
+                    <div className="mx-auto flex w-full max-w-md flex-col gap-3 sm:flex-row">
+                      <button
+                        type="button"
+                        onClick={() => cameraInputRef.current?.click()}
+                        className="inline-flex min-h-12 flex-1 items-center justify-center rounded-lg bg-green-600 px-4 py-3 font-semibold text-white transition hover:bg-green-700"
+                      >
+                        <Camera className="mr-2 h-5 w-5" aria-hidden />
+                        Tomar foto
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="inline-flex min-h-12 flex-1 items-center justify-center rounded-lg border-2 border-green-600 px-4 py-3 font-semibold text-green-700 transition hover:bg-green-50"
+                      >
+                        <ImagePlus className="mr-2 h-5 w-5" aria-hidden />
+                        Galería
+                      </button>
+                    </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
                 onChange={handleFileSelect}
                 className="hidden"
               />
