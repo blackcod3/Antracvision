@@ -165,7 +165,7 @@ function DashboardContent() {
           badge={<TrendBadge value={stats.anthracnose_pct} emphasize />}
           title="Con Antracnosis"
           value={stats.anthracnose}
-          footnote={`${stats.severe} en etapa severa`}
+          footnote={`${stats.severe} en estado crítico`}
         />
 
         <StatCard

@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import { Check, Eye, ShieldAlert, X } from 'lucide-react';
 
-export type DetectionStatus = 'Severa' | 'Moderada' | 'Leve' | 'Sana';
+export type DetectionStatus = 'crítico' | 'moderado' | 'leve' | 'saludable';
 
 export type RecentDetection = {
   id: number;
@@ -24,7 +24,7 @@ export const SAMPLE_DETECTIONS: RecentDetection[] = [
     code: '#DET-0007',
     label: 'Antracnosis',
     origin: 'Imagen subida',
-    status: 'Severa',
+    status: 'crítico',
     confidence: 96,
     date: 'Hoy, 09:41',
   },
@@ -33,7 +33,7 @@ export const SAMPLE_DETECTIONS: RecentDetection[] = [
     code: '#DET-0006',
     label: 'Sana',
     origin: 'Cámara',
-    status: 'Sana',
+    status: 'saludable',
     confidence: 88,
     date: 'Hoy, 08:15',
   },
@@ -42,7 +42,7 @@ export const SAMPLE_DETECTIONS: RecentDetection[] = [
     code: '#DET-0005',
     label: 'Antracnosis',
     origin: 'Imagen subida',
-    status: 'Moderada',
+    status: 'moderado',
     confidence: 91,
     date: 'Ayer, 17:02',
   },
@@ -51,7 +51,7 @@ export const SAMPLE_DETECTIONS: RecentDetection[] = [
     code: '#DET-0004',
     label: 'Antracnosis',
     origin: 'Cámara',
-    status: 'Leve',
+    status: 'leve',
     confidence: 84,
     date: 'Ayer, 11:47',
   },
@@ -60,21 +60,21 @@ export const SAMPLE_DETECTIONS: RecentDetection[] = [
     code: '#DET-0003',
     label: 'Antracnosis',
     origin: 'Imagen subida',
-    status: 'Severa',
+    status: 'crítico',
     confidence: 94,
     date: '18 jul, 14:20',
   },
 ];
 
 const STATUS_STYLES: Record<DetectionStatus, string> = {
-  Severa: 'bg-[#fde8e8] text-[#c62828]',
-  Moderada: 'bg-[#ffedd5] text-[#c45c26]',
-  Leve: 'bg-[#fef3c7] text-[#a16207]',
-  Sana: 'bg-[#dcfce7] text-[#15803d]',
+  crítico: 'bg-[#fde8e8] text-[#c62828]',
+  moderado: 'bg-[#ffedd5] text-[#c45c26]',
+  leve: 'bg-[#fef3c7] text-[#a16207]',
+  saludable: 'bg-[#dcfce7] text-[#15803d]',
 };
 
 function DetectionIcon({ status }: { status: DetectionStatus }) {
-  const healthy = status === 'Sana';
+  const healthy = status === 'saludable';
   return (
     <div
       className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${
@@ -186,7 +186,7 @@ export function DetectionHistoryTable({
               <td className="px-5 py-4 text-sm text-gray-600 sm:px-6">{row.origin}</td>
               <td className="px-5 py-4 sm:px-6">
                 <span
-                  className={`inline-flex rounded-md px-2.5 py-1 text-xs font-semibold ${STATUS_STYLES[row.status]}`}
+                  className={`inline-flex rounded-md px-2.5 py-1 text-xs font-semibold capitalize ${STATUS_STYLES[row.status]}`}
                 >
                   {row.status}
                 </span>

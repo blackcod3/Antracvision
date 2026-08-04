@@ -9,13 +9,6 @@ from app.db.session import SessionLocal
 DAY_LABELS_ES = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
 PERIOD_DAYS = 7
 
-SEVERITY_LABELS = {
-    "crítico": "Severa",
-    "moderado": "Moderada",
-    "leve": "Leve",
-}
-
-
 def record_detection(
     clase: str,
     confidence: float = 0.0,
@@ -84,11 +77,11 @@ def _format_relative_date(at: datetime) -> str:
 
 def _serialize_detection(event: Detection) -> dict:
     if event.clase == "Sana":
-        status = "Sana"
         label = "Sana"
+        status = event.estado or "saludable"
     else:
-        status = SEVERITY_LABELS.get(event.severity or "", "Leve")
         label = "Antracnosis"
+        status = event.estado or "leve"
 
     return {
         "id": event.id,

@@ -81,10 +81,10 @@ function normalizeDetection(raw: Record<string, unknown>): RecentDetection | nul
 
   const status = raw.status;
   if (
-    status !== 'Severa' &&
-    status !== 'Moderada' &&
-    status !== 'Leve' &&
-    status !== 'Sana'
+    status !== 'crítico' &&
+    status !== 'moderado' &&
+    status !== 'leve' &&
+    status !== 'saludable'
   ) {
     return null;
   }
@@ -236,7 +236,7 @@ export default function DetectionHistoryPage() {
               </div>
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Estado</p>
-                <p className="text-sm text-gray-900">{detail.status}</p>
+                <p className="text-sm capitalize text-gray-900">{detail.status}</p>
               </div>
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Confianza</p>
