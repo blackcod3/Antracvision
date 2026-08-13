@@ -141,13 +141,26 @@ export function DetectionWorkspace({ variant = 'public' }: DetectionWorkspacePro
       });
 
       if (!response.ok) {
-        throw new Error('Error en la detección');
+        let detail = 'Error en la detección';
+        try {
+          const payload = await response.json();
+          if (typeof payload?.detail === 'string' && payload.detail.trim()) {
+            detail = payload.detail;
+          }
+        } catch {
+          /* ignore non-JSON error bodies */
+        }
+        throw new Error(detail);
       }
 
       const data: DetectionResult = await response.json();
       setResult(data);
     } catch (err) {
-      setError('Error al procesar la imagen. Por favor intenta nuevamente.');
+      const message =
+        err instanceof Error && err.message
+          ? err.message
+          : 'Error al procesar la imagen. Por favor intenta nuevamente.';
+      setError(message);
       console.error(err);
     } finally {
       setLoading(false);
