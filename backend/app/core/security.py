@@ -9,7 +9,11 @@ from app.db.session import get_db
 from app.db.models import User
 from app.services import user_service
 
-security = HTTPBearer()
+security = HTTPBearer(
+    bearerFormat="JWT",
+    scheme_name="BearerAuth",
+    description="Token JWT. Obligatorio en las rutas protegidas.",
+)
 
 
 def create_access_token(data: dict, expires_delta: timedelta):

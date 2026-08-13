@@ -12,7 +12,7 @@ from app.services import profile_service, user_service
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
 
-@router.post("/login")
+@router.post("/login", summary="Iniciar sesión")
 async def login(credentials: LoginRequest, db: Session = Depends(get_db)):
     user = user_service.authenticate_user(db, credentials.username, credentials.password)
     if user is None:
@@ -34,12 +34,12 @@ async def login(credentials: LoginRequest, db: Session = Depends(get_db)):
     }
 
 
-@router.get("/me")
+@router.get("/me", summary="Perfil autenticado")
 async def me(user: User = Depends(get_current_user)):
     return user_service.public_profile(user)
 
 
-@router.put("/profile")
+@router.put("/profile", summary="Actualizar perfil")
 async def update_profile(
     payload: ProfileUpdateRequest,
     user: User = Depends(get_current_user),
@@ -55,7 +55,7 @@ async def update_profile(
     )
 
 
-@router.post("/avatar")
+@router.post("/avatar", summary="Subir avatar")
 async def upload_avatar(
     avatar: UploadFile = File(...),
     user: User = Depends(get_current_user),
@@ -64,7 +64,7 @@ async def upload_avatar(
     return await profile_service.save_avatar(db, user, avatar)
 
 
-@router.delete("/avatar")
+@router.delete("/avatar", summary="Eliminar avatar")
 async def delete_avatar(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),

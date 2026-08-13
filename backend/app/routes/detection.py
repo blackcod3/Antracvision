@@ -30,7 +30,7 @@ def _save_detection_image(raw: bytes, content_type: str | None) -> str | None:
     return f"/uploads/detections/{filename}"
 
 
-@router.post("/detect")
+@router.post("/detect", response_model=DetectionResponse, summary="Detectar antracnosis")
 async def detect(file: UploadFile = File(...)):
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Archivo inválido: se requiere una imagen")

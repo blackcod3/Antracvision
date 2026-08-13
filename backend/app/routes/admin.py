@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.orm import Session
 from app.core.security import require_roles
 from app.db.models import User
@@ -12,7 +12,15 @@ from app.services.system_status_service import get_system_status
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
 
 
-@router.get("/stats")
+@router.get("/openapi.json", include_in_schema=False)
+async def openapi_spec(
+    request: Request,
+    _: User = Depends(require_roles(ROLE_ADMIN)),
+):
+    return request.app.openapi()
+
+
+@router.get("/stats", summary="Estadísticas del dashboard")
 async def stats(
     _: User = Depends(require_roles(ROLE_ADMIN, ROLE_OPERATOR)),
     db: Session = Depends(get_db),
@@ -20,7 +28,7 @@ async def stats(
     return get_stats(db)
 
 
-@router.get("/detections")
+@router.get("/detections", summary="Historial de detecciones")
 async def detections(
     limit: int = 100,
     _: User = Depends(require_roles(ROLE_ADMIN, ROLE_OPERATOR)),
@@ -30,7 +38,7 @@ async def detections(
     return {"detections": get_recent_detections(capped, db=db)}
 
 
-@router.delete("/detections/{detection_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/detections/{detection_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Eliminar detección")
 async def delete_detection(
     detection_id: int,
     _: User = Depends(require_roles(ROLE_ADMIN, ROLE_OPERATOR)),
@@ -39,12 +47,12 @@ async def delete_detection(
     soft_delete_detection(db, detection_id)
 
 
-@router.get("/system-status")
+@router.get("/system-status", summary="Estado del sistema")
 async def system_status(_: User = Depends(require_roles(ROLE_ADMIN))):
     return get_system_status()
 
 
-@router.get("/roles")
+@router.get("/roles", summary="Listar roles")
 async def roles(
     _: User = Depends(require_roles(ROLE_ADMIN)),
     db: Session = Depends(get_db),
@@ -52,7 +60,7 @@ async def roles(
     return {"roles": user_service.list_roles(db)}
 
 
-@router.get("/users")
+@router.get("/users", summary="Listar usuarios")
 async def users(
     _: User = Depends(require_roles(ROLE_ADMIN)),
     db: Session = Depends(get_db),
@@ -60,7 +68,7 @@ async def users(
     return {"users": user_service.list_users(db)}
 
 
-@router.get("/users/{user_id}")
+@router.get("/users/{user_id}", summary="Obtener usuario")
 async def get_user(
     user_id: int,
     _: User = Depends(require_roles(ROLE_ADMIN)),
@@ -69,7 +77,7 @@ async def get_user(
     return user_service.public_profile(user_service.get_user_by_id(db, user_id))
 
 
-@router.post("/users", status_code=status.HTTP_201_CREATED)
+@router.post("/users", status_code=status.HTTP_201_CREATED, summary="Crear usuario")
 async def create_user(
     payload: CreateUserRequest,
     _: User = Depends(require_roles(ROLE_ADMIN)),
@@ -86,7 +94,7 @@ async def create_user(
     return user_service.public_profile(user)
 
 
-@router.put("/users/{user_id}")
+@router.put("/users/{user_id}", summary="Actualizar usuario")
 async def update_user(
     user_id: int,
     payload: UpdateUserRequest,
@@ -106,7 +114,7 @@ async def update_user(
     return user_service.public_profile(user)
 
 
-@router.patch("/users/{user_id}/active")
+@router.patch("/users/{user_id}/active", summary="Activar o desactivar usuario")
 async def set_user_active(
     user_id: int,
     payload: SetUserActiveRequest,
@@ -122,7 +130,7 @@ async def set_user_active(
     return user_service.public_profile(user)
 
 
-@router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Eliminar usuario")
 async def delete_user(
     user_id: int,
     actor: User = Depends(require_roles(ROLE_ADMIN)),
