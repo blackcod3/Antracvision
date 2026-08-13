@@ -48,6 +48,11 @@ const detectionChildren: readonly NavChild[] = [
   { href: '/admin/detect/historial', label: 'Historial de detecciones' },
 ];
 
+const settingsChildren: readonly NavChild[] = [
+  { href: '/admin/settings', label: 'Estado del sistema', exact: true },
+  { href: '/admin/settings/doc-api', label: 'Documentación API' },
+];
+
 const moduleItems: readonly ModuleItem[] = [
   {
     key: 'detection',
@@ -65,7 +70,13 @@ const moduleItems: readonly ModuleItem[] = [
     icon: Wrench,
     children: maintenanceChildren,
   },
-  { key: 'settings', href: '/admin/settings', label: 'Configuración', icon: Crosshair },
+  {
+    key: 'settings',
+    href: '/admin/settings',
+    label: 'Configuración',
+    icon: Crosshair,
+    children: settingsChildren,
+  },
 ];
 
 function isActive(pathname: string, href: string, exact?: boolean) {

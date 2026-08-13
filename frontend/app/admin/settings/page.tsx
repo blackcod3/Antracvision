@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { Activity, AlertCircle, CheckCircle, Cpu, Database, RefreshCw, Server, } from 'lucide-react';
+import Link from 'next/link';
+import { Activity, AlertCircle, CheckCircle, Cpu, Database, FileJson, RefreshCw, Server } from 'lucide-react';
 import { API_BASE, getAdminToken } from '@/components/organisms/AdminShell';
 
 type StatusTone = 'operational' | 'degraded' | 'disconnected' | 'configured' | 'error';
@@ -23,7 +24,6 @@ type SystemStatus = {
     cors: string;
     auth: string;
     token_expire_minutes: number;
-    endpoints: Array<{ method: string; path: string; description: string }>;
     runtime: {
       python: string;
       system: string;
@@ -301,23 +301,19 @@ function SettingsContent() {
             />
           </dl>
 
-          <h3 className="mb-3 mt-6 text-sm font-semibold uppercase tracking-wide text-gray-500">
-            Endpoints activos
-          </h3>
-          <ul className="space-y-2">
-            {status.api.endpoints.map((endpoint) => (
-              <li
-                key={`${endpoint.method}-${endpoint.path}`}
-                className="flex flex-col gap-1 rounded-lg bg-gray-50 px-3 py-2.5 sm:flex-row sm:items-center sm:gap-3"
-              >
-                <span className="inline-flex w-fit rounded bg-[#1a2f26] px-2 py-0.5 text-[11px] font-bold text-white">
-                  {endpoint.method}
-                </span>
-                <code className="text-sm font-medium text-gray-900">{endpoint.path}</code>
-                <span className="text-sm text-gray-500 sm:ml-auto">{endpoint.description}</span>
-              </li>
-            ))}
-          </ul>
+          <Link
+            href="/admin/settings/doc-api"
+            className="mt-6 flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 transition hover:border-[#1a2f26]/30 hover:bg-white"
+          >
+            <FileJson className="size-5 shrink-0 text-[#1a2f26]" aria-hidden />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-gray-900">Documentación API (Swagger)</p>
+              <p className="text-xs text-gray-500">
+                Explorar y probar las rutas protegidas del backend
+              </p>
+            </div>
+            <span className="ml-auto text-sm font-medium text-[#1a2f26]">Abrir →</span>
+          </Link>
         </section>
 
         {/* Model */}

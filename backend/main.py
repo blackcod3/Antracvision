@@ -24,7 +24,19 @@ async def lifespan(_: FastAPI):
 app = FastAPI(
     title="API Detección de Antracnosis",
     version="1.2.0",
+    description=(
+        "API de AntracVision para autenticación, detección de antracnosis y administración. "
+    ),
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
     lifespan=lifespan,
+    openapi_tags=[
+        {"name": "Health", "description": "Disponibilidad del servicio."},
+        {"name": "Auth", "description": "Inicio de sesión, perfil y avatar."},
+        {"name": "Detection", "description": "Clasificación de imágenes con YOLOv8."},
+        {"name": "Admin", "description": "Estadísticas, usuarios y estado del sistema."},
+    ],
 )
 
 app.add_middleware(
