@@ -147,7 +147,7 @@ function DashboardContent() {
           badge={<TrendBadge value={stats.total_change_pct} emphasize />}
           title="Total Detecciones"
           value={stats.total_detections}
-          footnote={`vs. ${stats.previous_total} el periodo anterior`}
+          footnote="en todo el historial"
         />
 
         <StatCard
@@ -165,7 +165,7 @@ function DashboardContent() {
           badge={<TrendBadge value={stats.anthracnose_pct} emphasize />}
           title="Con Antracnosis"
           value={stats.anthracnose}
-          footnote={`${stats.severe} en estado crítico`}
+          footnote="del total analizado"
         />
 
         <StatCard
@@ -178,7 +178,7 @@ function DashboardContent() {
           }
           title="Confianza promedio"
           value={`${confidenceDisplay}%`}
-          footnote="del modelo YOLOv8"
+          footnote="del modelo YOLOv8-cls"
         />
       </div>
 

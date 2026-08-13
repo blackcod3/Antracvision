@@ -326,6 +326,11 @@ export function DetectionWorkspace({ variant = 'public' }: DetectionWorkspacePro
                 <div className="rounded-lg bg-gray-50 p-4">
                   <p className="mb-1 text-sm text-gray-600">Estado</p>
                   <p className="text-2xl font-bold capitalize text-gray-900">{result.estado}</p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {result.clase === 'Sana'
+                      ? 'Según la clase detectada'
+                      : 'Según el área de lesión visible, no la confianza del modelo'}
+                  </p>
                 </div>
               </div>
 

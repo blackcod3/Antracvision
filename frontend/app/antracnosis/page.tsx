@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
+import { DiseaseBrochureSection } from '@/components/organisms/DiseaseBrochureSection';
 import { DiseaseEducationVideoSection } from '@/components/organisms/DiseaseEducationVideoSection';
 import { DiseasePhasesSection } from '@/components/organisms/DiseasePhasesSection';
 import { ProcessIntro } from '@/components/molecules/ProcessIntro';
@@ -45,10 +46,12 @@ export default function AntracnosisPage() {
           <ProcessIntro
             eyebrow="Ampliación"
             title="Evolución de la antracnosis en el cultivo"
-            subtitle="Aquí encontrarás una guía paso a paso con imágenes representativas y un espacio para material audiovisual que complemente lo ya visto en la sección Conoce la enfermedad."
+            subtitle="Aquí encontrarás una guía paso a paso con imágenes representativas, un folleto informativo y material audiovisual que complemente lo ya visto en la sección Conoce la enfermedad."
           />
 
           <DiseasePhasesSection />
+
+          <DiseaseBrochureSection />
 
           <DiseaseEducationVideoSection />
 

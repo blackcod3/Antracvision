@@ -195,24 +195,21 @@ def get_stats(db: Session | None = None) -> dict:
         current_events = _in_window(events, current_start, now)
         previous_events = _in_window(events, previous_start, current_start)
 
-        source = current_events if current_events else events
-
-        total = len(source)
-        healthy = sum(1 for e in source if e.clase == "Sana")
-        anthracnose = sum(1 for e in source if e.clase == "Antracnosis")
-        mild = sum(1 for e in source if e.severity == "leve")
-        moderate = sum(1 for e in source if e.severity == "moderado")
-        severe = sum(1 for e in source if e.severity == "crítico")
-        avg_confidence = sum(e.confidence for e in source) / total if total > 0 else 0.0
+        total = len(events)
+        healthy = sum(1 for e in events if e.clase == "Sana")
+        anthracnose = sum(1 for e in events if e.clase == "Antracnosis")
+        mild = sum(1 for e in events if e.severity == "leve")
+        moderate = sum(1 for e in events if e.severity == "moderado")
+        severe = sum(1 for e in events if e.severity == "crítico")
+        avg_confidence = sum(e.confidence for e in events) / total if total > 0 else 0.0
 
         previous_total = len(previous_events)
-        if previous_total == 0 and len(events) > total:
-            previous_total = len(events) - total
+        current_period_total = len(current_events)
 
         if previous_total > 0:
-            total_change_pct = ((total - previous_total) / previous_total) * 100
+            total_change_pct = ((current_period_total - previous_total) / previous_total) * 100
         else:
-            total_change_pct = 0.0 if total == 0 else 100.0
+            total_change_pct = 0.0 if current_period_total == 0 else 100.0
 
         healthy_pct = (healthy / total * 100) if total > 0 else 0.0
         anthracnose_pct = (anthracnose / total * 100) if total > 0 else 0.0
