@@ -22,6 +22,31 @@ ADMIN_FULL_NAME = os.getenv("ADMIN_FULL_NAME", "Administrador")
 MODEL_PATH = os.getenv("MODEL_PATH", "app/models/yolov8_cls_best.pt")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
+# OpenRouter (Anthropic-compatible env names). Sin clave se usan reglas locales.
+LLM_API_KEY = (
+    os.getenv("ANTHROPIC_AUTH_TOKEN")
+    or os.getenv("OPENROUTER_API_KEY")
+    or os.getenv("GEMINI_API_KEY")
+    or ""
+).strip()
+LLM_BASE_URL = (
+    os.getenv("ANTHROPIC_BASE_URL") or "https://openrouter.ai/api"
+).strip().rstrip("/")
+# Text model for recommendations (can be free text-only, e.g. openai/gpt-oss-20b:free)
+LLM_MODEL = (
+    os.getenv("ANTHROPIC_MODEL") or os.getenv("GEMINI_MODEL") or "openai/gpt-oss-20b:free"
+).strip()
+# Vision model for orange verification (must accept image input)
+LLM_VISION_MODEL = (
+    os.getenv("ANTHROPIC_VISION_MODEL") or "google/gemma-4-26b-a4b-it:free"
+).strip()
+# Minimum confidence from vision model to reject a non-orange upload
+LLM_ORANGE_REJECT_THRESHOLD = float(
+    os.getenv("LLM_ORANGE_REJECT_THRESHOLD")
+    or os.getenv("GEMINI_ORANGE_REJECT_THRESHOLD")
+    or "0.70"
+)
+
 def _normalize_database_url(url: str) -> str:
     """Force SQLAlchemy to use psycopg3 (not psycopg2).
 
