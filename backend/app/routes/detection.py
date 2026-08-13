@@ -47,22 +47,11 @@ async def detect(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="No se pudo leer la imagen")
 
     img_array = np.array(img)
-    clase, confidence = predict_image(img_array)
-    probabilidad = float(confidence)
-
-    if clase == "Sana":
-        estado = "saludable"
-        recomendacion = "La planta se ve saludable. Mantén buenas prácticas de riego y monitoreo."
-    else:
-        if probabilidad >= 0.85:
-            estado = "crítico"
-            recomendacion = "Aislar el fruto afectado y aplicar tratamiento fungicida; consulta a un agrónomo."
-        elif probabilidad >= 0.65:
-            estado = "moderado"
-            recomendacion = "Revisar más frutos, mejorar ventilación y considerar tratamiento preventivo."
-        else:
-            estado = "leve"
-            recomendacion = "Monitorear la evolución y retirar frutos sospechosos; mejorar condiciones de cultivo."
+    prediction = predict_image(img_array)
+    clase = prediction["clase"]
+    probabilidad = float(prediction["confidence"])
+    estado = prediction["estado"]
+    recomendacion = prediction["recomendacion"]
 
     image_url = None
     try:

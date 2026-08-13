@@ -453,7 +453,7 @@ export default function MaintenanceUsersPage() {
               <thead>
                 <tr className="border-b border-gray-100 text-xs uppercase tracking-wide text-gray-500">
                   <th className="px-2 py-3 font-semibold">Nombre</th>
-                  <th className="px-2 py-3 font-semibold">Usuario</th>
+                  <th className="px-2 py-3 font-semibold">Email</th>
                   <th className="px-2 py-3 font-semibold">Rol</th>
                   <th className="px-2 py-3 font-semibold">Estado</th>
                   <th className="px-2 py-3 text-right font-semibold">Acciones</th>
