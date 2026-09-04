@@ -40,6 +40,8 @@ def _get_api_status() -> dict:
             {"method": "GET", "path": "/api/admin/stats", "description": "Estadísticas"},
             {"method": "GET", "path": "/api/admin/detections", "description": "Historial de detecciones"},
             {"method": "DELETE", "path": "/api/admin/detections/{id}", "description": "Eliminar detección (lógico)"},
+            {"method": "GET", "path": "/api/admin/reports", "description": "Reporte de detecciones"},
+            {"method": "GET", "path": "/api/admin/reports/export", "description": "Exportar reporte a Excel"},
             {"method": "GET", "path": "/api/admin/system-status", "description": "Estado del sistema"},
             {"method": "GET", "path": "/api/admin/roles", "description": "Listar roles"},
             {"method": "GET", "path": "/api/admin/users", "description": "Listar usuarios"},

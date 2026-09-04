@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Query, Request, status
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 from app.core.security import require_roles
 from app.db.models import User
@@ -6,6 +7,7 @@ from app.db.session import get_db
 from app.db.seed import ROLE_ADMIN, ROLE_OPERATOR
 from app.schemas.user_schema import CreateUserRequest, SetUserActiveRequest, UpdateUserRequest
 from app.services import user_service
+from app.services.report_service import export_detections_excel, get_detections_report
 from app.services.stats_service import get_recent_detections, get_stats, soft_delete_detection
 from app.services.system_status_service import get_system_status
 
@@ -45,6 +47,49 @@ async def delete_detection(
     db: Session = Depends(get_db),
 ):
     soft_delete_detection(db, detection_id)
+
+
+@router.get("/reports", summary="Reporte de detecciones")
+async def detections_report(
+    date_from: str | None = None,
+    date_to: str | None = None,
+    clase: str | None = None,
+    status_filter: str | None = Query(None, alias="status"),
+    limit: int = 500,
+    _: User = Depends(require_roles(ROLE_ADMIN, ROLE_OPERATOR)),
+    db: Session = Depends(get_db),
+):
+    return get_detections_report(
+        db,
+        date_from=date_from,
+        date_to=date_to,
+        clase=clase,
+        status=status_filter,
+        limit=limit,
+    )
+
+
+@router.get("/reports/export", summary="Exportar reporte de detecciones a Excel")
+async def detections_report_export(
+    date_from: str | None = None,
+    date_to: str | None = None,
+    clase: str | None = None,
+    status_filter: str | None = Query(None, alias="status"),
+    _: User = Depends(require_roles(ROLE_ADMIN, ROLE_OPERATOR)),
+    db: Session = Depends(get_db),
+):
+    content, filename = export_detections_excel(
+        db,
+        date_from=date_from,
+        date_to=date_to,
+        clase=clase,
+        status=status_filter,
+    )
+    return Response(
+        content=content,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @router.get("/system-status", summary="Estado del sistema")
